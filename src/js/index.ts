@@ -1,12 +1,61 @@
-interface Person {
-    firstName: string;
-    lastName: string;
+import axios, {
+    AxiosResponse,
+    AxiosError
+} from "../../node_modules/axios/index"
+
+interface ICar {
+    id: number
+    model: string
+    vendor: string
+    price: number
 }
 
-function greeter(person: Person): string {
-    return "Hello, " + person.firstName + " " + person.lastName;
-}
-let user: Person = { firstName: "John", lastName: "Doe" };
+let baseUri: string = "http://anbo-carsrest.azurewebsites.net/api/cars"
 
-let element: HTMLDivElement = <HTMLDivElement> document.getElementById("content");
-element.innerHTML = greeter(user);
+new Vue({
+    el: "#app",
+    data: {
+        cars: [],
+        errors: [],
+        deleteId: 0,
+        deleteMessage: "",
+        formData: { model: "", vendor: "", price: 0 },
+        addMessage: ""
+    },
+    methods: {
+        getAllCars() {
+            axios.get<ICar[]>(baseUri)
+                .then((response: AxiosResponse<ICar[]>) => {
+                    this.cars = response.data
+                })
+                .catch((error: AxiosError) => {
+                    //this.message = error.message
+                    alert(error.message) // https://www.w3schools.com/js/js_popup.asp
+                })
+        },
+        deleteCar(deleteId: number) {
+            let uri: string = baseUri + "/" + deleteId
+            axios.delete<void>(uri)
+                .then((response: AxiosResponse<void>) => {
+                    this.deleteMessage = response.status + " " + response.statusText
+                    this.getAllCars()
+                })
+                .catch((error: AxiosError) => {
+                    //this.deleteMessage = error.message
+                    alert(error.message)
+                })
+        },
+        addCar() {
+            axios.post<ICar>(baseUri, this.formData)
+                .then((response: AxiosResponse) => {
+                    let message: string = "response " + response.status + " " + response.statusText
+                    this.addMessage = message
+                    this.getAllCars()
+                })
+                .catch((error: AxiosError) => {
+                    // this.addMessage = error.message
+                    alert(error.message)
+                })
+        }
+    }
+})
