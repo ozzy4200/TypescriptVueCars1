@@ -16,46 +16,49 @@ new Vue({
     el: "#app",
     data: {
         cars: [],
-        errors: [],
-        deleteId: 0,
-        deleteMessage: "",
-        formData: { model: "", vendor: "", price: 0 },
-        addMessage: ""
+        errorMessage: ""
+       formData: {
+            model: "",
+            vendor: "",
+            price: 0
+        },
+        addMessage: "",
+        deleteId: -1,
+        deleteMessage: ""
     },
     methods: {
         getAllCars() {
+            console.log("getAllCars")
             axios.get<ICar[]>(baseUri)
                 .then((response: AxiosResponse<ICar[]>) => {
+                    console.log(response.data)
                     this.cars = response.data
                 })
                 .catch((error: AxiosError) => {
-                    //this.message = error.message
-                    alert(error.message) // https://www.w3schools.com/js/js_popup.asp
-                })
-        },
-        deleteCar(deleteId: number) {
-            let uri: string = baseUri + "/" + deleteId
-            axios.delete<void>(uri)
-                .then((response: AxiosResponse<void>) => {
-                    this.deleteMessage = response.status + " " + response.statusText
-                    this.getAllCars()
-                })
-                .catch((error: AxiosError) => {
-                    //this.deleteMessage = error.message
                     alert(error.message)
+                    this.addMessage = error.message
                 })
         },
         addCar() {
             axios.post<ICar>(baseUri, this.formData)
-                .then((response: AxiosResponse) => {
-                    let message: string = "response " + response.status + " " + response.statusText
-                    this.addMessage = message
+                .then((response: AxiosResponse<ICar>) => {
+                    console.log(response.data)
+                    this.addMessage = "Car added"
+                })
+                .catch((error: AxiosError) => {
+                    this.addMessage = "Car added"
+                })
+        },
+        deleteCar(deleteId: number) {
+            let uri: string = baseUri + "/" + deleteId
+            axios.delete<void>(baseUri)
+                .then((response: AxiosResponse<void>) => {
+                    this.deleteMessage = "Car deleted"
                     this.getAllCars()
                 })
                 .catch((error: AxiosError) => {
-                    // this.addMessage = error.message
-                    alert(error.message)
-                })
+                    this.deleteMessage = error.message
+                }
         }
     }
 })
